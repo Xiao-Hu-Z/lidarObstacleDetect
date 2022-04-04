@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="lidar_detection_track" type="lidar_detection_track_node" name="lidar_detection_track_node" output="screen">
+        <rosparam file="$(find lidar_detection_track)/config/lidar_detection_track.yaml" command="load"/>
+    </node>
+</launch>
