@@ -1,6 +1,6 @@
 
-
 1.安装相应的 ros 依赖包
+
 ```
 sudo apt-get install ros-melodic-jsk-rviz-plugins
 sudo apt-get install ros-melodic-jsk-recognition-msgs
@@ -28,8 +28,9 @@ source ~/.bashrc
 ```
 
 3.启动
+
 ```
+rosbag play -l kitti_2011_09_30_drive_0016_synced.bag /kitti/velo/pointcloud:=/velodyne_points
+
 roslaunch lidar_obstacle_detection lidar_obstacle_detection.launch
 ```
-
-

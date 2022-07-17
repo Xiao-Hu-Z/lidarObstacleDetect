@@ -33,7 +33,7 @@ add_subdirectory(lib/bounding_box)
 add_subdirectory(lib/ground_detector/patchwork)
 add_subdirectory(lib/visualization)
 
-add_executable(${PROJECT_NAME}_node src/lidar_obstacle_detection_node.cpp src/lidar_obstacle_detection.cpp  )
+add_executable(${PROJECT_NAME}_node src/lidar_obstacle_detection_node.cpp src/lidar_obstacle_detection.cpp)
 target_link_libraries(${PROJECT_NAME}_node
   ${OpenCV_LIBRARIES}
   ${catkin_LIBRARIES}
