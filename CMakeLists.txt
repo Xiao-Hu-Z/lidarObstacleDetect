@@ -28,7 +28,7 @@ include_directories(
 # 添加子目录并构建
 add_subdirectory(lib/pre_process/roi_clip)
 add_subdirectory(lib/pre_process/voxel_grid_filter)
-add_subdirectory(lib/cluster/euclideanCluster)
+add_subdirectory(lib/euclidean_cluster)
 add_subdirectory(lib/bounding_box)
 add_subdirectory(lib/ground_detector/patchwork)
 add_subdirectory(lib/visualization)
@@ -40,7 +40,7 @@ target_link_libraries(${PROJECT_NAME}_node
   ${PCL_LIBRARIES}
   roi_clip
   voxel_grid_filter
-  euclideanCluster
+  euclidean_cluster
   bounding_box
   patchwork
   visualization

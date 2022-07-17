@@ -26,7 +26,7 @@ void checkClusterMerge(std_msgs::Header header, size_t in_cluster_id, std::vecto
 
 void mergeClusters(std_msgs::Header header, std::vector<BoundingBoxPtr> &in_clusters, std::vector<BoundingBoxPtr> &out_clusters,
                    std::vector<size_t> in_merge_indices, const size_t &current_index,
-                   std::vector<bool> &in_out_merged_clusters, bool inEstimatePose_)
+                   std::vector<bool> &in_out_merged_clusters, bool in_estimate_pose_)
 {
   // std::cout << "mergeClusters:" << in_merge_indices.size() << std::endl;
   pcl::PointCloud<pcl::PointXYZRGB> sum_cloud;
@@ -46,13 +46,13 @@ void mergeClusters(std_msgs::Header header, std::vector<BoundingBoxPtr> &in_clus
   if (sum_cloud.points.size() > 0)
   {
     pcl::copyPointCloud(sum_cloud, mono_cloud);
-    merged_cluster->SetCloud(header, mono_cloud.makeShared(), inEstimatePose_);
+    merged_cluster->SetCloud(header, mono_cloud.makeShared(), in_estimate_pose_);
     out_clusters.push_back(merged_cluster);
   }
 }
 
 void checkAllForMerge(std_msgs::Header header, std::vector<BoundingBoxPtr> &in_clusters, std::vector<BoundingBoxPtr> &out_clusters,
-                      float in_merge_threshold, bool inEstimatePose_)
+                      float in_merge_threshold, bool in_estimate_pose_)
 {
   // std::cout << "checkAllForMerge" << std::endl;
   std::vector<bool> visited_clusters(in_clusters.size(), false);
@@ -65,7 +65,7 @@ void checkAllForMerge(std_msgs::Header header, std::vector<BoundingBoxPtr> &in_c
       visited_clusters[i] = true;
       std::vector<size_t> merge_indices;
       checkClusterMerge(header, i, in_clusters, visited_clusters, merge_indices, in_merge_threshold);
-      mergeClusters(header, in_clusters, out_clusters, merge_indices, current_index++, merged_clusters, inEstimatePose_);
+      mergeClusters(header, in_clusters, out_clusters, merge_indices, current_index++, merged_clusters, in_estimate_pose_);
     }
   }
   for (size_t i = 0; i < in_clusters.size(); i++)
@@ -86,8 +86,8 @@ BoundingBox::BoundingBox()
 
 BoundingBox::BoundingBox(ros::NodeHandle pnh)
 {
-  pnh.param("inEstimatePose", inEstimatePose_, false);
-  pnh.param("clusterMergeThreshold", clusterMergeThreshold_, 0.7);
+  pnh.param("in_estimate_pose", in_estimate_pose_, false);
+  pnh.param("cluster_merge_threshold", cluster_merge_threshold_, 0.7);
 }
 
 BoundingBox::~BoundingBox() {}
@@ -136,12 +136,12 @@ void BoundingBox::SetCloud(std_msgs::Header header, const pcl::PointCloud<pcl::P
       max_z = p.z;
   }
   // min, max points
-  minPoint_.x = min_x;
-  minPoint_.y = min_y;
-  minPoint_.z = min_z;
-  maxPoint_.x = max_x;
-  maxPoint_.y = max_y;
-  maxPoint_.z = max_z;
+  min_point_.x = min_x;
+  min_point_.y = min_y;
+  min_point_.z = min_z;
+  max_point_.x = max_x;
+  max_point_.y = max_y;
+  max_point_.z = max_z;
 
   // calculate centroid, average
   if (in->points.size() > 0)
@@ -155,24 +155,24 @@ void BoundingBox::SetCloud(std_msgs::Header header, const pcl::PointCloud<pcl::P
     average_z /= in->points.size();
   }
 
-  averagePoint_.x = average_x;
-  averagePoint_.y = average_y;
-  averagePoint_.z = average_z;
+  average_point_.x = average_x;
+  average_point_.y = average_y;
+  average_point_.z = average_z;
 
   // calculate bounding box
-  float length_ = maxPoint_.x - minPoint_.x;
-  float width_ = maxPoint_.y - minPoint_.y;
-  float height_ = maxPoint_.z - minPoint_.z;
+  float length_ = max_point_.x - min_point_.x;
+  float width_ = max_point_.y - min_point_.y;
+  float height_ = max_point_.z - min_point_.z;
 
-  boundingBox_.header = header;
+  bounding_box_.header = header;
 
-  boundingBox_.pose.position.x = minPoint_.x + length_ / 2;
-  boundingBox_.pose.position.y = minPoint_.y + width_ / 2;
-  boundingBox_.pose.position.z = minPoint_.z + height_ / 2;
+  bounding_box_.pose.position.x = min_point_.x + length_ / 2;
+  bounding_box_.pose.position.y = min_point_.y + width_ / 2;
+  bounding_box_.pose.position.z = min_point_.z + height_ / 2;
 
-  boundingBox_.dimensions.x = ((length_ < 0) ? -1 * length_ : length_);
-  boundingBox_.dimensions.y = ((width_ < 0) ? -1 * width_ : width_);
-  boundingBox_.dimensions.z = ((height_ < 0) ? -1 * height_ : height_);
+  bounding_box_.dimensions.x = ((length_ < 0) ? -1 * length_ : length_);
+  bounding_box_.dimensions.y = ((width_ < 0) ? -1 * width_ : width_);
+  bounding_box_.dimensions.z = ((height_ < 0) ? -1 * height_ : height_);
 
   // pose estimation
   double rz = 0;
@@ -195,7 +195,7 @@ void BoundingBox::SetCloud(std_msgs::Header header, const pcl::PointCloud<pcl::P
     geometry_msgs::Point32 point;
     point.x = hull[i % hull.size()].x;
     point.y = hull[i % hull.size()].y;
-    point.z = minPoint_.z;
+    point.z = min_point_.z;
     polygon_.polygon.points.push_back(point);
   }
 
@@ -203,17 +203,17 @@ void BoundingBox::SetCloud(std_msgs::Header header, const pcl::PointCloud<pcl::P
   {
     cv::RotatedRect box = minAreaRect(hull);
     rz = box.angle * 3.14 / 180;
-    boundingBox_.pose.position.x = box.center.x;
-    boundingBox_.pose.position.y = box.center.y;
-    boundingBox_.dimensions.x = box.size.width;
-    boundingBox_.dimensions.y = box.size.height;
+    bounding_box_.pose.position.x = box.center.x;
+    bounding_box_.pose.position.y = box.center.y;
+    bounding_box_.dimensions.x = box.size.width;
+    bounding_box_.dimensions.y = box.size.height;
   }
 
   // set bounding box direction
   tf::Quaternion quat = tf::createQuaternionFromRPY(0.0, 0.0, rz);
 
   /** \brief convert Quaternion to Quaternion msg*/
-  tf::quaternionTFToMsg(quat, boundingBox_.pose.orientation);
+  tf::quaternionTFToMsg(quat, bounding_box_.pose.orientation);
 
   currentCluster->width = currentCluster->points.size();
   currentCluster->height = 1;
@@ -228,8 +228,8 @@ void BoundingBox::SetCloud(std_msgs::Header header, const pcl::PointCloud<pcl::P
     pcl::copyPointCloud(*currentCluster, *current_cluster_mono);
 
     currentClusterPca.setInputCloud(current_cluster_mono);
-    eigenVectors_ = currentClusterPca.getEigenVectors();
-    eigenValues_ = currentClusterPca.getEigenValues();
+    eigen_vectors_ = currentClusterPca.getEigenVectors();
+    eigen_values_ = currentClusterPca.getEigenValues();
   }
 
   validCluster_ = true;
@@ -248,7 +248,7 @@ void BoundingBox::getBoundingBox(std_msgs::Header header,
     // *outCloudPtr += *temp_cluster;
 
     BoundingBoxPtr cluster(new BoundingBox());
-    cluster->SetCloud(header, points_vector[i], inEstimatePose_);
+    cluster->SetCloud(header, points_vector[i], in_estimate_pose_);
     Clusters.push_back(cluster);
   }
 
@@ -258,12 +258,12 @@ void BoundingBox::getBoundingBox(std_msgs::Header header,
   std::vector<BoundingBoxPtr> finalClusters;
 
   if (Clusters.size() > 0)
-    checkAllForMerge(header, Clusters, midClusters, clusterMergeThreshold_, inEstimatePose_);
+    checkAllForMerge(header, Clusters, midClusters, cluster_merge_threshold_, in_estimate_pose_);
   else
     midClusters = Clusters;
 
   if (midClusters.size() > 0)
-    checkAllForMerge(header, midClusters, finalClusters, clusterMergeThreshold_, inEstimatePose_);
+    checkAllForMerge(header, midClusters, finalClusters, cluster_merge_threshold_, in_estimate_pose_);
   else
     finalClusters = midClusters;
 
@@ -291,19 +291,19 @@ void BoundingBox::ToROSMessage(std_msgs::Header header, autoware_msgs::CloudClus
 
   outClusterMessage.cloud = cloud_msg;
   outClusterMessage.min_point.header = header;
-  outClusterMessage.min_point.point.x = this->minPoint_.x;
-  outClusterMessage.min_point.point.y = this->minPoint_.y;
-  outClusterMessage.min_point.point.z = this->minPoint_.z;
+  outClusterMessage.min_point.point.x = this->min_point_.x;
+  outClusterMessage.min_point.point.y = this->min_point_.y;
+  outClusterMessage.min_point.point.z = this->min_point_.z;
 
   outClusterMessage.max_point.header = header;
-  outClusterMessage.max_point.point.x = this->maxPoint_.x;
-  outClusterMessage.max_point.point.y = this->maxPoint_.y;
-  outClusterMessage.max_point.point.z = this->maxPoint_.z;
+  outClusterMessage.max_point.point.x = this->max_point_.x;
+  outClusterMessage.max_point.point.y = this->max_point_.y;
+  outClusterMessage.max_point.point.z = this->max_point_.z;
 
   outClusterMessage.avg_point.header = header;
-  outClusterMessage.avg_point.point.x = this->averagePoint_.x;
-  outClusterMessage.avg_point.point.y = this->averagePoint_.y;
-  outClusterMessage.avg_point.point.z = this->averagePoint_.z;
+  outClusterMessage.avg_point.point.x = this->average_point_.x;
+  outClusterMessage.avg_point.point.y = this->average_point_.y;
+  outClusterMessage.avg_point.point.z = this->average_point_.z;
 
   outClusterMessage.centroid_point.header = header;
   outClusterMessage.centroid_point.point.x = this->centroid_.x;
@@ -312,18 +312,18 @@ void BoundingBox::ToROSMessage(std_msgs::Header header, autoware_msgs::CloudClus
 
   // outClusterMessage.estimated_angle = this->GetOrientationAngle();
 
-  outClusterMessage.dimensions = this->boundingBox_.dimensions;
+  outClusterMessage.dimensions = this->bounding_box_.dimensions;
 
-  outClusterMessage.bounding_box = this->boundingBox_;
+  outClusterMessage.bounding_box = this->bounding_box_;
 
   outClusterMessage.convex_hull = this->polygon_;
 
-  Eigen::Vector3f eigen_values = this->eigenValues_;
+  Eigen::Vector3f eigen_values = this->eigen_values_;
   outClusterMessage.eigen_values.x = eigen_values.x();
   outClusterMessage.eigen_values.y = eigen_values.y();
   outClusterMessage.eigen_values.z = eigen_values.z();
 
-  Eigen::Matrix3f eigen_vectors = this->eigenVectors_;
+  Eigen::Matrix3f eigen_vectors = this->eigen_vectors_;
   for (unsigned int i = 0; i < 3; i++)
   {
     geometry_msgs::Vector3 eigen_vector;

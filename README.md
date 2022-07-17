@@ -30,7 +30,6 @@ source ~/.bashrc
 3.启动
 ```
 roslaunch lidar_obstacle_detection lidar_obstacle_detection.launch
-rviz -d rviz.rviz
 ```
 
 

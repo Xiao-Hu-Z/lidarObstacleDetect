@@ -33,36 +33,25 @@ public:
                         std::vector<pcl::PointCloud<pcl::PointXYZI>::Ptr> &points_vector,
                         autoware_msgs::CloudClusterArray &inOutClusters);
     void ToROSMessage(std_msgs::Header header, autoware_msgs::CloudCluster &outClusterMessage);
-    // void checkAllForMerge(std_msgs::Header header, std::vector<BoundingBoxPtr> &in_clusters, std::vector<BoundingBoxPtr> &out_clusters,
-    //                                    double in_merge_threshold);
-    // void checkClusterMerge(std_msgs::Header header, size_t in_cluster_id, std::vector<BoundingBoxPtr> &in_clusters,
-    //                        std::vector<bool> &in_out_visited_clusters, std::vector<size_t> &out_merge_indices,
-    //                        double in_merge_threshold);
-    // void mergeClusters(std_msgs::Header header, const std::vector<BoundingBoxPtr> &in_clusters, std::vector<BoundingBoxPtr> &out_clusters,
-    //                    std::vector<size_t> in_merge_indices, const size_t &current_index,
-    //                    std::vector<bool> &in_out_merged_clusters);
-
     jsk_recognition_msgs::BoundingBox GetBoundingBox();
-    /* \brief Returns the calculated PolygonArray of the object */
     geometry_msgs::PolygonStamped GetPolygon();
 
-    bool inEstimatePose_;
+    bool in_estimate_pose_;
 
     bool validCluster_;
     pcl::PointXYZ centroid_;
-    pcl::PointXYZ minPoint_;
-    pcl::PointXYZ maxPoint_;
-    pcl::PointXYZ averagePoint_;
-    jsk_recognition_msgs::BoundingBox boundingBox_;
+    pcl::PointXYZ min_point_;
+    pcl::PointXYZ max_point_;
+    pcl::PointXYZ average_point_;
+    jsk_recognition_msgs::BoundingBox bounding_box_;
     geometry_msgs::PolygonStamped polygon_;
-    // pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointCloud_(new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr pointCloud_;
 
-    Eigen::Matrix3f eigenVectors_;
-    Eigen::Vector3f eigenValues_;
+    Eigen::Matrix3f eigen_vectors_;
+    Eigen::Vector3f eigen_values_;
     double orientation_angle_;
 
-    double clusterMergeThreshold_;
+    double cluster_merge_threshold_;
 };
 
 typedef boost::shared_ptr<BoundingBox> BoundingBoxPtr;
