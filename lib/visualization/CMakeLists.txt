@@ -8,12 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
 include_directories(
   ${catkin_INCLUDE_DIRS}
 )
-
-
-
 aux_source_directory(. DIR_SRCS)
 
-#SHARED 动态库
-#STATIC 静态库
 add_library(visualization ${DIR_SRCS})
 
