@@ -1,4 +1,7 @@
 
+本代码传统聚类障碍物检测流程：
+![image](https://user-images.githubusercontent.com/42265454/223046960-d721c7b7-c4ac-4431-98ae-bc0072e17686.png)
+
 
 1.安装相应的 ros 依赖包
 ```
