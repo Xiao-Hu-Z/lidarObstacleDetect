@@ -39,3 +39,5 @@ launch有两个节点，运行launch直接会打开rviz可视化
 - centroid：bounding_box中心
 
 上图为bounding_box未加方向，加方向后，效果不太好，对于道路两边的区域的姿态估计显然会不准确，可以将`isEstimatePose`字段设置为true，观测添加姿态估计后的效果
+
+业余写的一个粗版demo，有很多地方是可以改进的，大家自行修改吧
