@@ -1,11 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(lidar_detection_track)
 
-#Release
-#自己笔记本不能加这行，否则报错误：
-#double free or corruption (out)
-#已放弃
-# SET(CMAKE_BUILD_TYPE "Release")
+
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall -g -pthread")
 # # Debug
