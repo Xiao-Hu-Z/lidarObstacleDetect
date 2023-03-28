@@ -278,36 +278,23 @@ VisualizeDetectedObjects::ObjectsToBoxes(const autoware_msgs::DetectedObjectArra
       p[7].z = object.dimensions.z / 2;  
 
        
-      // if (object.pose_reliable){
-      if(true){
-      // // 方法1: 欧拉角求旋转平移矩阵
-      // float angle = object.pose.orientation;
-      // float cos_ = cos(angle);
-      // float sin_ = sin(angle);
-      // float RT[12] = {
-      //   cos_, -sin_, 0., object.pose.position.x,
-      //   sin_, cos_,  0., object.pose.position.y,
-      //   0.,   0.,    1.,  object.pose.position.z 
-      // };
-      // // 方法2: 四元数求旋转平移矩阵
-          float x = object.pose.orientation.x; // pose.orientation表示方向，四元数的格式
-          float y = object.pose.orientation.y;
-          float z = object.pose.orientation.z;
-          float w = object.pose.orientation.w;
-          float RT[12] = {
-             1-2*y*y-2*z*z,  2*x*y-2*z*w,    2*x*z+2*y*w,    float(object.pose.position.x), // pose.position表示包围盒中心点坐标
-             2*x*y+2*z*w,    1-2*x*x-2*z*z,  2*y*z-2*x*w,    float(object.pose.position.y),
-             2*x*z-2*y*w,    2*y*z+2*x*w,    1-2*x*x-2*y*y,  float(object.pose.position.z) };        
-          for(int i=0;i<8;i++)
-          {
-              float x = RT[0] * p[i].x + RT[1] * p[i].y +  RT[2] * p[i].z + RT[3];
-              float y = RT[4] * p[i].x + RT[5] * p[i].y +  RT[6] * p[i].z + RT[7];
-              float z = RT[8] * p[i].x + RT[9] * p[i].y +  RT[10] * p[i].z + RT[11];
-              p[i].x = x;
-              p[i].y = y;
-              p[i].z = z;
-          }    
-      }
+      float x = object.pose.orientation.x; // pose.orientation表示方向，四元数的格式
+      float y = object.pose.orientation.y;
+      float z = object.pose.orientation.z;
+      float w = object.pose.orientation.w;
+      float RT[12] = {
+         1-2*y*y-2*z*z,  2*x*y-2*z*w,    2*x*z+2*y*w,    float(object.pose.position.x), // pose.position表示包围盒中心点坐标
+         2*x*y+2*z*w,    1-2*x*x-2*z*z,  2*y*z-2*x*w,    float(object.pose.position.y),
+         2*x*z-2*y*w,    2*y*z+2*x*w,    1-2*x*x-2*y*y,  float(object.pose.position.z) };        
+      for(int i=0;i<8;i++)
+      {
+          float x = RT[0] * p[i].x + RT[1] * p[i].y +  RT[2] * p[i].z + RT[3];
+          float y = RT[4] * p[i].x + RT[5] * p[i].y +  RT[6] * p[i].z + RT[7];
+          float z = RT[8] * p[i].x + RT[9] * p[i].y +  RT[10] * p[i].z + RT[11];
+          p[i].x = x;
+          p[i].y = y;
+          p[i].z = z;
+      }   
       else
       {
          for (size_t j = 0; j < 8; j++)
