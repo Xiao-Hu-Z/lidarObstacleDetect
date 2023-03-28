@@ -6,10 +6,7 @@ int64_t euclidean_time = 0.;
 int64_t total_time = 0.;
 int counter = 0;
 
-// // pointpillars
-std::string pfe_model_path = "models/1130/pfe.stream";
-std::string rpn_model_path = "models/1130/rpn.stream";
-std::string label_str[5] = {"Car", "Pedestrian", "Cyclist", "Bus", "Truck"};
+
 
 int64_t gtm()
 {
