@@ -295,15 +295,7 @@ VisualizeDetectedObjects::ObjectsToBoxes(const autoware_msgs::DetectedObjectArra
           p[i].y = y;
           p[i].z = z;
       }   
-      else
-      {
-         for (size_t j = 0; j < 8; j++)
-        {
-          p[j].x +=  object.pose.position.x;
-          p[j].y +=  object.pose.position.y;
-          p[j].z +=  object.pose.position.z;
-        }
-      }          
+        
       for (size_t i = 0; i < 8; i++)
       {
         box.points.push_back(p[i]);

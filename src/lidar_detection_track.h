@@ -19,8 +19,8 @@
 #include "autoware_msgs/DetectedObjectArray.h"
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
-#include <opencv/cv.h>
-#include <opencv/highgui.h>
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui.hpp> // 窗口与图像显示模块
 #include <opencv2/core/version.hpp>
 
 #include "../lib/ground_detector/patchwork/patchwork.h"
@@ -45,6 +45,7 @@ public:
     BoundingBox boundingBox_;
     VisualizeDetectedObjects vdo_;
 
+    ros::Publisher _pub_in_cloud;
     ros::Publisher _pub_clip_cloud;
     ros::Publisher _pub_ground_cloud;
     ros::Publisher _pub_noground_cloud;

@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(lidar_detection_track)
 
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall -g -pthread")
@@ -8,6 +10,9 @@ SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall -g -pthread")
 # SET(CMAKE_BUILD_TYPE "Debug")
 # SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
 # SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
+
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
 
 
 # find_package(CUDA REQUIRED)

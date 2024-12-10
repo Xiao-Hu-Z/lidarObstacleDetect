@@ -29,9 +29,11 @@ void publishCloud(
 lidarPerception::lidarPerception(ros::NodeHandle nh, ros::NodeHandle pnh)
 	: roiClip_(nh, pnh), voxelGridFilter_(nh, pnh), cluster_(nh, pnh), boundingBox_(pnh)
 {
-	ros::Subscriber sub = nh.subscribe("/velodyne_points", 1, &lidarPerception::ClusterCallback, this);
+	// nuscenes的 topic
+	ros::Subscriber sub = nh.subscribe("/LIDAR_TOP", 1, &lidarPerception::ClusterCallback, this);
 
 	_pub_clip_cloud = nh.advertise<sensor_msgs::PointCloud2>("/xh/points_clip", 1);
+	_pub_in_cloud = nh.advertise<sensor_msgs::PointCloud2>("/xh/points_in", 1);
 	_pub_cluster_cloud = nh.advertise<sensor_msgs::PointCloud2>("/points_cluster", 1);
 	_pub_noground_cloud = nh.advertise<sensor_msgs::PointCloud2>("/xh/nopoints_ground", 1);
 	_pub_ground_cloud = nh.advertise<sensor_msgs::PointCloud2>("/xh/points_ground", 1);
@@ -41,6 +43,14 @@ lidarPerception::lidarPerception(ros::NodeHandle nh, ros::NodeHandle pnh)
 	_pub_cluster_visualize_markers = nh.advertise<visualization_msgs::MarkerArray>("/xh/visualize/cluster_markers", 1);
 
 	ros::spin();
+}
+
+void transformPointCloudToFrontLeftUp(pcl::PointCloud<pcl::PointXYZI>::Ptr cloud) {
+    for (auto& point : cloud->points) {
+		float temp = point.y;
+        point.y = point.x; 
+		point.x = temp; 
+    }
 }
 
 void lidarPerception::ClusterCallback(
@@ -56,6 +66,9 @@ void lidarPerception::ClusterCallback(
 	pcl::PointCloud<pcl::PointXYZRGB>::Ptr cluster_cloud_ptr(new pcl::PointCloud<pcl::PointXYZRGB>);
 
 	pcl::fromROSMsg(*in_sensor_cloud, *in_cloud_ptr);
+	// nuscenes 右前上 -> 前左上
+	transformPointCloudToFrontLeftUp(in_cloud_ptr);
+
 	std::cout << "in_cloud_ptr " << in_cloud_ptr->points.size() << std::endl;
 	// 提取ROI
 	int64_t tm0 = gtm();
@@ -92,6 +105,7 @@ void lidarPerception::ClusterCallback(
 	_pub_cluster_visualize_markers.publish(visualize_markers);
 
 	// 发布topic
+	publishCloud(&_pub_in_cloud, in_sensor_cloud->header, in_cloud_ptr);
 	publishCloud(&_pub_clip_cloud, in_sensor_cloud->header, clip_cloud_ptr);
 	publishCloud(&_pub_noground_cloud, in_sensor_cloud->header, noground_cloud_ptr);
 	publishCloud(&_pub_cluster_cloud, in_sensor_cloud->header, outCloudPtr);
